@@ -26,6 +26,18 @@ export default class ValidateEvents extends Command {
       description: 'Exported file name',
       required: true,
     }),
+    step: Flags.string({
+      default: '1000',
+      char: 's',
+      description: 'Number of events to process per batch',
+      required: true,
+    }),
+    limitOfDays: Flags.string({
+      default: '60',
+      char: 'd',
+      description: 'Exclude events older than this flag in days',
+      required: true,
+    }),
   }
 
   static args = {}
@@ -34,11 +46,11 @@ export default class ValidateEvents extends Command {
 
   public outFileLocation = ''
 
-  private step = 1000
+  public step = 1000
+
+  public limitOfDays = 60
 
   private numberOfProcessedEvent = 0
-
-  private numberOfMillisecondInADay = 1000 * 60 * 60 * 24
 
   async run(): Promise<void> {
     const startingDate = new Date()
@@ -48,6 +60,8 @@ export default class ValidateEvents extends Command {
     this.log('Looking for configuration in file', flags.configFile)
     this.jcustomerConfigs = await fs.readJSON(flags.configFile)
     this.outFileLocation = flags.out
+    this.step = Number.parseInt(flags.step, 10)
+    this.limitOfDays = Number.parseInt(flags.limitOfDays, 10)
 
     const errors = await this.processEvents({})
 
@@ -58,20 +72,15 @@ export default class ValidateEvents extends Command {
     this.log(`Processed ${this.numberOfProcessedEvent} events in ${endDate.getTime() - startingDate.getTime()} ms`)
   }
 
-  async processEvents(errors: { [key: string]: Set<string> }, limit = this.step, offset = 0): Promise<any> {
-    this.debug(`Start batch of ${limit} from index ${offset}`)
-    const events = await this.findEvents(limit, offset)
+  async processEvents(errors: { [key: string]: Set<string> }, offset = 0): Promise<any> {
+    this.debug(`Start batch of ${this.step} from index ${offset}`)
+    const events = await this.findEvents(offset)
 
     if (events.length > 0) {
       this.numberOfProcessedEvent += events.length
       errors = this.mergeErrors(errors, await this.validateEvents(events))
 
-      const lastEventDate = new Date(events.pop().timeStamp)
-      const currentDate = new Date()
-
-      if ((currentDate.getTime() - lastEventDate.getTime()) / this.numberOfMillisecondInADay <= 60) {
-        return this.processEvents(errors, limit, offset + this.step)
-      }
+      return this.processEvents(errors, offset + this.step)
     }
 
     return errors
@@ -95,18 +104,31 @@ export default class ValidateEvents extends Command {
     return baseErrors
   }
 
-  async findEvents(limit = 100, offset = 0): Promise<Array<any>> {
+  async findEvents(offset = 0): Promise<Array<any>> {
     const {source} = this.jcustomerConfigs
     const response = await axios.post(`${source.url}/cxs/events/search`, {
       sortby: 'timeStamp:desc',
-      limit: limit,
+      limit: this.step,
       offset: offset,
       condition: {
-        type: 'eventPropertyCondition',
+        type: 'booleanCondition',
         parameterValues: {
-          comparisonOperator: 'notIn',
-          propertyName: 'eventType',
-          propertyValues: ['sessionCreated', 'goal', 'sessionReassigned'],
+          operator: 'and',
+          subConditions: [{
+            type: 'eventPropertyCondition',
+            parameterValues: {
+              comparisonOperator: 'notIn',
+              propertyName: 'eventType',
+              propertyValues: ['sessionCreated', 'goal', 'sessionReassigned'],
+            },
+          }, {
+            type: 'eventPropertyCondition',
+            parameterValues: {
+              comparisonOperator: 'greaterThan',
+              propertyName: 'timeStamp',
+              propertyValueDateExpr: `now-${this.limitOfDays}d`,
+            },
+          }],
         },
       },
     }, {
@@ -115,8 +137,7 @@ export default class ValidateEvents extends Command {
         password: source.password,
       },
     })
-
-    return response.data.list.map((element: any) => this.mapEvent(element))
+    return response.data ? response.data.list.map((element: any) => this.mapEvent(element)) : []
   }
 
   mapEvent(event: any): any {

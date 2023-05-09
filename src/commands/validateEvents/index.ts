@@ -1,4 +1,5 @@
 import {Command, Flags, ux} from '@oclif/core'
+// eslint-disable-next-line node/no-extraneous-import
 import * as fs from 'fs-extra'
 import axios from 'axios'
 

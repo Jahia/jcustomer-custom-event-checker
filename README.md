@@ -60,7 +60,7 @@ USAGE
 FLAGS
   -d, --limitOfDays=<value>  (required) [default: 60] Exclude events older than this flag in days
   -f, --configFile=<value>   (required) [default: ./defaultConfig.json] JSON configuration file location
-  -o, --out=<value>          (required) [default: ./data/error.json] Exported file name
+  -o, --out=<value>          (required) [default: ./errors.json] Exported file path
   -s, --step=<value>         (required) [default: 1000] Number of events to process per batch
 
 DESCRIPTION

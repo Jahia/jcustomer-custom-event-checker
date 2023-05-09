@@ -21,9 +21,9 @@ export default class ValidateEvents extends Command {
       required: true,
     }),
     out: Flags.string({
-      default: './data/error.json',
+      default: './errors.json',
       char: 'o',
-      description: 'Exported file name',
+      description: 'Exported file path',
       required: true,
     }),
     step: Flags.string({

@@ -13,11 +13,11 @@ jCustomer events checker CLI
 # Usage
 <!-- usage -->
 ```sh-session
-$ npm install -g custom-event-checker
+$ npm install -g jcustomer-custom-event-checker
 $ custom-event-checker COMMAND
 running command...
 $ custom-event-checker (--version)
-custom-event-checker/0.1.0 darwin-x64 node-v19.4.0
+jcustomer-custom-event-checker/0.1.0 darwin-x64 node-v19.4.0
 $ custom-event-checker --help [COMMAND]
 USAGE
   $ custom-event-checker COMMAND
@@ -51,7 +51,7 @@ _See code: [@oclif/plugin-help](https://github.com/oclif/plugin-help/blob/v5.2.9
 
 ## `custom-event-checker validateEvents`
 
-Build a file with the unknown properties per event
+This script will get the events from a jCustomer instance and will validate them on another one.
 
 ```
 USAGE
@@ -59,12 +59,13 @@ USAGE
 
 FLAGS
   -d, --limitOfDays=<value>  (required) [default: 60] Exclude events older than this flag in days
-  -f, --configFile=<value>   (required) [default: ./defaultConfig.json] JSON configuration file location
-  -o, --out=<value>          (required) [default: ./data/error.json] Exported file name
+  -f, --configFile=<value>   (required) [default: ./defaultConfig.json] jCustomer JSON configuration file location
+  -o, --out=<value>          (required) [default: ./errors.json] Exported file path
   -s, --step=<value>         (required) [default: 1000] Number of events to process per batch
 
 DESCRIPTION
-  Build a file with the unknown properties per event
+  This script will get the events from a jCustomer instance and will validate them on another one.
+  The structure of the configuration file can be found in the defaultConfig.json file at the root of this project
 
 EXAMPLES
   $ custom-event-checker validateEvents --configFile=./path/to/your/config/config.json --out=./out.json
@@ -73,5 +74,5 @@ EXAMPLES
     Processed 315 events in 1546 ms
 ```
 
-_See code: [dist/commands/validateEvents/index.ts](https://github.com/jsinovassin/custom-event-checker/blob/v0.1.0/dist/commands/validateEvents/index.ts)_
+_See code: [dist/commands/validateEvents/index.ts](https://github.com/Jahia/jcustomer-custom-event-checker/blob/v0.1.0/dist/commands/validateEvents/index.ts)_
 <!-- commandsstop -->

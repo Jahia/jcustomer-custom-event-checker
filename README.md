@@ -13,29 +13,29 @@ jCustomer events checker CLI
 # Usage
 <!-- usage -->
 ```sh-session
-$ npm install -g jcustomer-custom-event-checker
-$ custom-event-checker COMMAND
+$ npm install -g @jahia/jcustomer-custom-event-checker
+$ jcustomer-custom-event-checker COMMAND
 running command...
-$ custom-event-checker (--version)
-jcustomer-custom-event-checker/0.1.0 darwin-x64 node-v19.4.0
-$ custom-event-checker --help [COMMAND]
+$ jcustomer-custom-event-checker (--version)
+@jahia/jcustomer-custom-event-checker/0.3.0 darwin-x64 node-v19.4.0
+$ jcustomer-custom-event-checker --help [COMMAND]
 USAGE
-  $ custom-event-checker COMMAND
+  $ jcustomer-custom-event-checker COMMAND
 ...
 ```
 <!-- usagestop -->
 # Commands
 <!-- commands -->
-* [`custom-event-checker help [COMMANDS]`](#custom-event-checker-help-commands)
-* [`custom-event-checker validateEvents`](#custom-event-checker-validateevents)
+* [`jcustomer-custom-event-checker help [COMMANDS]`](#jcustomer-custom-event-checker-help-commands)
+* [`jcustomer-custom-event-checker validateEvents`](#jcustomer-custom-event-checker-validateevents)
 
-## `custom-event-checker help [COMMANDS]`
+## `jcustomer-custom-event-checker help [COMMANDS]`
 
-Display help for custom-event-checker.
+Display help for jcustomer-custom-event-checker.
 
 ```
 USAGE
-  $ custom-event-checker help [COMMANDS] [-n]
+  $ jcustomer-custom-event-checker help [COMMANDS] [-n]
 
 ARGUMENTS
   COMMANDS  Command to show help for.
@@ -44,18 +44,18 @@ FLAGS
   -n, --nested-commands  Include all nested commands in the output.
 
 DESCRIPTION
-  Display help for custom-event-checker.
+  Display help for jcustomer-custom-event-checker.
 ```
 
 _See code: [@oclif/plugin-help](https://github.com/oclif/plugin-help/blob/v5.2.9/src/commands/help.ts)_
 
-## `custom-event-checker validateEvents`
+## `jcustomer-custom-event-checker validateEvents`
 
 This script will get the events from a jCustomer instance and will validate them on another one.
 
 ```
 USAGE
-  $ custom-event-checker validateEvents -f <value> -o <value> -s <value> -d <value>
+  $ jcustomer-custom-event-checker validateEvents -f <value> -o <value> -s <value> -d <value>
 
 FLAGS
   -d, --limitOfDays=<value>  (required) [default: 60] Exclude events older than this flag in days
@@ -68,11 +68,11 @@ DESCRIPTION
   The structure of the configuration file can be found in the defaultConfig.json file at the root of this project
 
 EXAMPLES
-  $ custom-event-checker validateEvents --configFile=./path/to/your/config/config.json --out=./out.json
+  $ jcustomer-custom-event-checker validateEvents --configFile=./path/to/your/config/config.json --out=./out.json
     Start the events analysis
     Looking for configuration in file ./path/to/your/config/config.json
     Processed 315 events in 1546 ms
 ```
 
-_See code: [dist/commands/validateEvents/index.ts](https://github.com/Jahia/jcustomer-custom-event-checker/blob/v0.1.0/dist/commands/validateEvents/index.ts)_
+_See code: [dist/commands/validateEvents/index.ts](https://github.com/Jahia/jcustomer-custom-event-checker/blob/v0.3.0/dist/commands/validateEvents/index.ts)_
 <!-- commandsstop -->

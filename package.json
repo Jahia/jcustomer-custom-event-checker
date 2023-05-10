@@ -1,15 +1,17 @@
 {
-  "name": "custom-event-checker",
+  "name": "jcustomer-custom-event-checker",
   "version": "0.1.0",
   "description": "Script that check events coming from a jCustomer to another one",
   "author": "SINOVASSIN-NAIK Jonathan",
   "bin": {
     "custom-event-identifier": "./bin/run"
   },
-  "homepage": "https://github.com/jsinovassin/custom-event-checker",
   "license": "MIT",
   "main": "dist/index.js",
-  "repository": "jsinovassin/custom-event-checker",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Jahia/jcustomer-custom-event-checker"
+  },
   "files": [
     "/bin",
     "/dist",

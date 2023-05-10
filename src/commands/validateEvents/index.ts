@@ -4,7 +4,8 @@ import * as fs from 'fs-extra'
 import axios from 'axios'
 
 export default class ValidateEvents extends Command {
-  static description = 'Build a file with the unknown properties per event'
+  static description = `This script will get the events from a jCustomer instance and will validate them on another one.
+  The structure of the configuration file can be found in the defaultConfig.json file at the root of this project`
 
   static examples = [
     `$ custom-event-checker validateEvents --configFile=./path/to/your/config/config.json --out=./out.json
@@ -18,7 +19,7 @@ export default class ValidateEvents extends Command {
     configFile: Flags.string({
       default: './defaultConfig.json',
       char: 'f',
-      description: 'JSON configuration file location',
+      description: 'jCustomer JSON configuration file location',
       required: true,
     }),
     out: Flags.string({

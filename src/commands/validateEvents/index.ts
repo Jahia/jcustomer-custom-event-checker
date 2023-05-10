@@ -8,7 +8,7 @@ export default class ValidateEvents extends Command {
   The structure of the configuration file can be found in the defaultConfig.json file at the root of this project`
 
   static examples = [
-    `$ custom-event-checker validateEvents --configFile=./path/to/your/config/config.json --out=./out.json
+    `$ jcustomer-custom-event-checker validateEvents --configFile=./path/to/your/config/config.json --out=./out.json
   Start the events analysis
   Looking for configuration in file ./path/to/your/config/config.json
   Processed 315 events in 1546 ms

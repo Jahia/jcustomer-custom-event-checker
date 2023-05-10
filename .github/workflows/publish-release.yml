@@ -32,11 +32,9 @@ jobs:
       image: node:lts-alpine
 
     steps:
-      - run: npm -g install @jahia/jahia-reporter@${{ github.event.release.tag_name }}
-      - run: jahia-reporter --help
-      - run: jahia-reporter testrail --help
-      - run: jahia-reporter zencrepes --help
-      - run: jahia-reporter slack --help
+      - run: npm -g install @jahia/jcustomer-custom-event-checker@${{ github.event.release.tag_name }}
+      - run: custom-event-checker --help
+      - run: custom-event-checker validateEvents --help
 
   docker:
     needs: [npm_test]
@@ -49,7 +47,7 @@ jobs:
       - name: Publish to Registry
         uses: elgohr/Publish-Docker-Github-Action@v5
         with:
-          name: jahia/jahia-reporter
+          name: jahia/jcustomer-custom-event-checker
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
           tags: 'latest,${{ env.RELEASE_VERSION }}'

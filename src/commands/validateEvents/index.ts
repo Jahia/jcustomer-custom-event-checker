@@ -44,13 +44,15 @@ export default class ValidateEvents extends Command {
 
   static args = {}
 
-  public jcustomerConfigs: any
+  private jcustomerConfigs: any
 
-  public outFileLocation = ''
+  private outFileLocation = ''
 
-  public step = 1000
+  private step = 1000
 
-  public limitOfDays = 60
+  private scrollIdentifier = null
+
+  private limitOfDays = 60
 
   private numberOfProcessedEvent = 0
 
@@ -74,15 +76,15 @@ export default class ValidateEvents extends Command {
     this.log(`Processed ${this.numberOfProcessedEvent} events in ${endDate.getTime() - startingDate.getTime()} ms`)
   }
 
-  async processEvents(errors: { [key: string]: Set<string> }, offset = 0): Promise<any> {
-    this.debug(`Start batch of ${this.step} from index ${offset}`)
-    const events = await this.findEvents(offset)
+  async processEvents(errors: { [key: string]: Set<string> }): Promise<any> {
+    this.debug(`Start next batch of ${this.step}`)
+    const events = await this.findEvents()
 
     if (events.length > 0) {
       this.numberOfProcessedEvent += events.length
       errors = this.mergeErrors(errors, await this.validateEvents(events))
 
-      return this.processEvents(errors, offset + this.step)
+      return this.processEvents(errors)
     }
 
     return errors
@@ -106,12 +108,13 @@ export default class ValidateEvents extends Command {
     return baseErrors
   }
 
-  async findEvents(offset = 0): Promise<Array<any>> {
+  async findEvents(): Promise<Array<any>> {
     const {source} = this.jcustomerConfigs
     const response = await axios.post(`${source.url}/cxs/events/search`, {
       sortby: 'timeStamp:desc',
       limit: this.step,
-      offset: offset,
+      scrollIdentifier: this.scrollIdentifier,
+      scrollTimeValidity: '2h',
       condition: {
         type: 'booleanCondition',
         parameterValues: {
@@ -139,6 +142,8 @@ export default class ValidateEvents extends Command {
         password: source.password,
       },
     })
+
+    this.scrollIdentifier = response.data.scrollIdentifier
     return response.data ? response.data.list.map((element: any) => this.mapEvent(element)) : []
   }
 

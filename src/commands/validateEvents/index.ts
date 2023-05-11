@@ -40,6 +40,12 @@ export default class ValidateEvents extends Command {
       description: 'Exclude events older than this flag in days',
       required: true,
     }),
+    scrollTimeValidity: Flags.string({
+      default: '2h',
+      char: 't',
+      description: 'Period to retain the search context for scrolling query . Value in time unit',
+      required: true,
+    }),
   }
 
   static args = {}
@@ -51,6 +57,8 @@ export default class ValidateEvents extends Command {
   private step = 1000
 
   private scrollIdentifier = null
+
+  private scrollTimeValidity = '2h'
 
   private limitOfDays = 60
 
@@ -66,6 +74,7 @@ export default class ValidateEvents extends Command {
     this.outFileLocation = flags.out
     this.step = Number.parseInt(flags.step, 10)
     this.limitOfDays = Number.parseInt(flags.limitOfDays, 10)
+    this.scrollTimeValidity = flags.scrollTimeValidity
 
     const errors = await this.processEvents({})
 
@@ -114,7 +123,7 @@ export default class ValidateEvents extends Command {
       sortby: 'timeStamp:desc',
       limit: this.step,
       scrollIdentifier: this.scrollIdentifier,
-      scrollTimeValidity: '2h',
+      scrollTimeValidity: this.scrollTimeValidity,
       condition: {
         type: 'booleanCondition',
         parameterValues: {

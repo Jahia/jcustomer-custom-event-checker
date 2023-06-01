@@ -1,7 +1,12 @@
+/* eslint-disable no-await-in-loop */
 import {Command, Flags, ux} from '@oclif/core'
 // eslint-disable-next-line node/no-extraneous-import
 import * as fs from 'fs-extra'
 import axios from 'axios'
+
+import {createScope} from '../../utils/create-scope'
+import {waitForScope} from '../../utils/wait-for-scope'
+import {parseErrorsForMissingScope} from '../../utils/parse-errors-for-missing-scope'
 
 export default class ValidateEvents extends Command {
   static description = `This script will get the events from a jCustomer instance and will validate them on another one.
@@ -46,6 +51,11 @@ export default class ValidateEvents extends Command {
       description: 'Period to retain the search context for scrolling query . Value in time unit',
       required: true,
     }),
+    createScopes: Flags.boolean({
+      default: false,
+      description:
+        'If scopes are missing, the script will attempt to create those in the remote jCustomer',
+    }),    
   }
 
   static args = {}
@@ -66,7 +76,7 @@ export default class ValidateEvents extends Command {
 
   async run(): Promise<void> {
     const startingDate = new Date()
-    ux.action.start('Start the events analysis')
+    ux.action.start('Analyzing the events')
     const {flags} = await this.parse(ValidateEvents)
 
     this.log('Looking for configuration in file', flags.configFile)
@@ -76,7 +86,7 @@ export default class ValidateEvents extends Command {
     this.limitOfDays = Number.parseInt(flags.limitOfDays, 10)
     this.scrollTimeValidity = flags.scrollTimeValidity
 
-    const errors = await this.processEvents({})
+    const errors = await this.processEvents({}, flags.createScopes)
 
     await this.writeErrorFile(errors)
 
@@ -85,15 +95,49 @@ export default class ValidateEvents extends Command {
     this.log(`Processed ${this.numberOfProcessedEvent} events in ${endDate.getTime() - startingDate.getTime()} ms`)
   }
 
-  async processEvents(errors: { [key: string]: Set<string> }): Promise<any> {
+  async processEvents(errors: { [key: string]: Set<string> }, createScopes: boolean): Promise<any> {
     this.debug(`Start next batch of ${this.step}`)
     const events = await this.findEvents()
 
     if (events.length > 0) {
       this.numberOfProcessedEvent += events.length
-      errors = this.mergeErrors(errors, await this.validateEvents(events))
+      ux.action.start(`Analyzing the events (events processed: ${this.numberOfProcessedEvent})`)
 
-      return this.processEvents(errors)
+      let validatedEvents = await this.validateEvents(events)
+
+      // This implementation assumes that it is not possible to query the scopes
+      // from jCustomer 1x, instead, rely on parsing errors messages to
+      // get the scopes
+      const missingScopes = parseErrorsForMissingScope(validatedEvents)
+      if (missingScopes.length > 0) {
+        this.log(`The following scopes are missing on the target instance: ${JSON.stringify(missingScopes)}`)
+        if (!createScopes) {
+          this.log('You must create these scopes before proceeding any further with event checking')
+          this.log('See: https://unomi.apache.org/manual/latest/#_scopes_declarations_are_now_required')
+          this.log('You can use the --createScopes flag to create these scopes automatically.')
+          this.log('The script will now EXIT, please create these scopes scopes and start again.')
+          this.exit(1)
+        }
+
+        // If scopes are missing, and create Scopes is set to true, the scopes are created and the events are validated again;
+        for (const scope of missingScopes) {
+          ux.action.start(`Creating scope: ${scope}`)
+          await createScope(scope, this.jcustomerConfigs.target)
+          const createdScope = await waitForScope(scope, this.jcustomerConfigs.target)
+          if (createdScope) {
+            ux.action.stop('done')
+          } else {
+            this.log(`Unable to create scope: ${scope}, please check the target instance`)
+            this.exit(1)
+          }
+        }
+
+        // Once the scopes have been created, perform the validation again for the same events
+        validatedEvents = await this.validateEvents(events)
+      }
+      errors = this.mergeErrors(errors, validatedEvents)
+
+      return this.processEvents(errors, createScopes)
     }
 
     return errors

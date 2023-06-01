@@ -119,7 +119,7 @@ export default class ValidateEvents extends Command {
           this.exit(1)
         }
 
-        // If scopes are missing, and create Scopes is set to true, the scopes are created and the events are validated again;
+        // If scopes are missing, and createScopes is set to true, the scopes are created and the events are validated again;
         for (const scope of missingScopes) {
           ux.action.start(`Creating scope: ${scope}`)
           await createScope(scope, this.jcustomerConfigs.target)

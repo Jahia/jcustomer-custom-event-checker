@@ -55,7 +55,7 @@ export default class ValidateEvents extends Command {
       default: false,
       description:
         'If scopes are missing, the script will attempt to create those in the remote jCustomer',
-    }),    
+    }),
   }
 
   static args = {}
@@ -135,6 +135,7 @@ export default class ValidateEvents extends Command {
         // Once the scopes have been created, perform the validation again for the same events
         validatedEvents = await this.validateEvents(events)
       }
+
       errors = this.mergeErrors(errors, validatedEvents)
 
       return this.processEvents(errors, createScopes)

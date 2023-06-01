@@ -115,7 +115,7 @@ export default class ValidateEvents extends Command {
           this.log('You must create these scopes before proceeding any further with event checking')
           this.log('See: https://unomi.apache.org/manual/latest/#_scopes_declarations_are_now_required')
           this.log('You can use the --createScopes flag to create these scopes automatically.')
-          this.log('The script will now EXIT, please create these scopes scopes and start again.')
+          this.log('The script will now EXIT, please create these scopes and start again.')
           this.exit(1)
         }
 

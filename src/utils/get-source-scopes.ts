@@ -2,6 +2,7 @@ import axios from 'axios'
 
 const filterData = (scopes: Array<string>) => {
   return scopes.filter((s: string) => {
+    if (s === '') return false
     if (s === '_missing') return false
     if (s === '_filtered') return false
     return true

@@ -125,7 +125,7 @@ export default class ValidateEvents extends Command {
         validatedEvents = await this.validateEvents(events)
       }
 
-      errors = this.mergeErrors(errors, await this.validateEvents(events))  
+      errors = this.mergeErrors(errors, await this.validateEvents(events))
 
       return this.processEvents(errors, createScopes)
     }

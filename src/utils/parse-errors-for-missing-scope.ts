@@ -14,7 +14,7 @@ export const parseErrorsForMissingScope = (errors: {
             const value = parsedError.error.split(' for value ')
             // If the scope is empty, it gets ignored as we want the corresponding
             // error to show up in the logs.
-            if (value[1] !== undefined && value[1] !== "" && !missingScopes.includes(value[1])) {
+            if (value[1] !== undefined && value[1] !== '' && !missingScopes.includes(value[1])) {
               missingScopes.push(value[1])
             }
           }

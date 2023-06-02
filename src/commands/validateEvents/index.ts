@@ -124,6 +124,7 @@ export default class ValidateEvents extends Command {
         // Once the scopes have been created, perform the validation again for the same events
         validatedEvents = await this.validateEvents(events)
       }
+      errors = this.mergeErrors(errors, await this.validateEvents(events))      
 
       return this.processEvents(errors, createScopes)
     }

@@ -12,7 +12,9 @@ export const parseErrorsForMissingScope = (errors: {
           // This should probably be replaced by a regex
           if (parsedError.error.includes('Unknown scope value at')) {
             const value = parsedError.error.split(' for value ')
-            if (value[1] !== undefined && !missingScopes.includes(value[1])) {
+            // If the scope is empty, it gets ignored as we want the corresponding
+            // error to show up in the logs.
+            if (value[1] !== undefined && value[1] !== "" && !missingScopes.includes(value[1])) {
               missingScopes.push(value[1])
             }
           }

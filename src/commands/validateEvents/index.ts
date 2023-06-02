@@ -4,9 +4,9 @@ import {Command, Flags, ux} from '@oclif/core'
 import * as fs from 'fs-extra'
 import axios from 'axios'
 
-import {createScope} from '../../utils/create-scope'
-import {waitForScope} from '../../utils/wait-for-scope'
+import {waitForScope, createScope, getMissingScopes} from '../../utils/scopes'
 import {parseErrorsForMissingScope} from '../../utils/parse-errors-for-missing-scope'
+import {getSourceScopes} from '../../utils/get-source-scopes'
 
 export default class ValidateEvents extends Command {
   static description = `This script will get the events from a jCustomer instance and will validate them on another one.
@@ -86,6 +86,14 @@ export default class ValidateEvents extends Command {
     this.limitOfDays = Number.parseInt(flags.limitOfDays, 10)
     this.scrollTimeValidity = flags.scrollTimeValidity
 
+    const sourceScopes = await getSourceScopes(this.jcustomerConfigs.source/* , this.limitOfDays */)
+
+    const missingScopes = await getMissingScopes(sourceScopes, this.jcustomerConfigs.target)
+    if (missingScopes.length > 0) {
+      this.missingScopesMsg(missingScopes, flags.createScopes)
+      await this.createScopes(missingScopes)
+    }
+
     const errors = await this.processEvents({}, flags.createScopes)
 
     await this.writeErrorFile(errors)
@@ -110,38 +118,53 @@ export default class ValidateEvents extends Command {
       // get the scopes
       const missingScopes = parseErrorsForMissingScope(validatedEvents)
       if (missingScopes.length > 0) {
-        this.log(`The following scopes are missing on the target instance: ${JSON.stringify(missingScopes)}`)
-        if (!createScopes) {
-          this.log('You must create these scopes before proceeding any further with event checking')
-          this.log('See: https://unomi.apache.org/manual/latest/#_scopes_declarations_are_now_required')
-          this.log('You can use the --createScopes flag to create these scopes automatically.')
-          this.log('The script will now EXIT, please create these scopes and start again.')
-          this.exit(1)
-        }
-
-        // If scopes are missing, and createScopes is set to true, the scopes are created and the events are validated again;
-        for (const scope of missingScopes) {
-          ux.action.start(`Creating scope: ${scope}`)
-          await createScope(scope, this.jcustomerConfigs.target)
-          const createdScope = await waitForScope(scope, this.jcustomerConfigs.target)
-          if (createdScope) {
-            ux.action.stop('done')
-          } else {
-            this.log(`Unable to create scope: ${scope}, please check the target instance`)
-            this.exit(1)
-          }
-        }
+        this.missingScopesMsg(missingScopes, createScopes)
+        this.createScopes(missingScopes)
 
         // Once the scopes have been created, perform the validation again for the same events
         validatedEvents = await this.validateEvents(events)
       }
 
-      errors = this.mergeErrors(errors, validatedEvents)
-
       return this.processEvents(errors, createScopes)
     }
 
     return errors
+  }
+
+  missingScopesMsg(missingScopes: Array<string>, createScopes: boolean) {
+    if (missingScopes.length > 0) {
+      this.log(
+        `The following scopes are missing on the target instance: ${JSON.stringify(
+          missingScopes,
+        )}`,
+      )
+      if (!createScopes) {
+        this.log('---')
+        this.log('You must create these scopes before proceeding any further with event checking')
+        this.log('See: https://unomi.apache.org/manual/latest/#_scopes_declarations_are_now_required')
+        this.log('You can use the --createScopes flag to create these scopes automatically.')
+        this.log('The script will now EXIT, please create these scopes scopes and start again.')
+        this.exit(1)
+      }
+    }
+  }
+
+  async createScopes(scopes: Array<string>) {
+    // If scopes are missing, and create Scopes is set to true, the scopes are created and the events are validated again;
+    for (const scope of scopes) {
+      ux.action.start(`Creating scope: ${scope}`)
+      await createScope(scope, this.jcustomerConfigs.target)
+      const createdScope = await waitForScope(
+        scope,
+        this.jcustomerConfigs.target,
+      )
+      if (createdScope) {
+        ux.action.stop('done')
+      } else {
+        this.log(`Unable to create scope: ${scope}, please check the remote server`)
+        this.exit(1)
+      }
+    }
   }
 
   mergeErrors(baseErrors: { [key: string]: Set<string> }, errorToMerge: { [key: string]: Set<string> }): any {

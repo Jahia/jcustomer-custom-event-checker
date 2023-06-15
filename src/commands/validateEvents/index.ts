@@ -227,12 +227,24 @@ export default class ValidateEvents extends Command {
   }
 
   removePageInfoParameters(event: any): any {
-    if (event.source && event.source.itemType === 'page' && event.source.properties?.pageInfo?.parameters) {
-      delete event.source.properties.pageInfo.parameters
+    if (event.source && event.source.itemType === 'page') {
+      if (event.source.properties?.pageInfo?.parameters) {
+        delete event.source.properties.pageInfo.parameters
+      }
+
+      if (event.source.properties?.pageInfo?.interests) {
+        delete event.source.properties.pageInfo.interests
+      }
     }
 
-    if (event.target && event.target.itemType === 'page' && event.target.properties?.pageInfo?.parameters) {
-      delete event.target.properties.pageInfo.parameters
+    if (event.target && event.target.itemType === 'page') {
+      if (event.target.properties?.pageInfo?.parameters) {
+        delete event.target.properties.pageInfo.parameters
+      }
+
+      if (event.target.properties?.pageInfo?.interests) {
+        delete event.target.properties.pageInfo.interests
+      }
     }
 
     return event

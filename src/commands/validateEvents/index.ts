@@ -203,7 +203,7 @@ export default class ValidateEvents extends Command {
             parameterValues: {
               comparisonOperator: 'notIn',
               propertyName: 'eventType',
-              propertyValues: ['sessionCreated', 'goal', 'sessionReassigned'],
+              propertyValues: ['sessionCreated', 'goal', 'sessionReassigned', 'updateProperties', 'profileUpdated', 'profileDeleted', 'anonymizeProfile'],
             },
           }, {
             type: 'eventPropertyCondition',
@@ -223,7 +223,31 @@ export default class ValidateEvents extends Command {
     })
 
     this.scrollIdentifier = response.data.scrollIdentifier
-    return response.data ? response.data.list.map((element: any) => this.mapEvent(element)) : []
+    return response.data ? response.data.list.map((element: any) => this.removePageInfoParameters(this.mapEvent(element))) : []
+  }
+
+  removePageInfoParameters(event: any): any {
+    if (event.source && event.source.itemType === 'page') {
+      if (event.source.properties?.pageInfo?.parameters) {
+        delete event.source.properties.pageInfo.parameters
+      }
+
+      if (event.source.properties?.pageInfo?.interests) {
+        delete event.source.properties.pageInfo.interests
+      }
+    }
+
+    if (event.target && event.target.itemType === 'page') {
+      if (event.target.properties?.pageInfo?.parameters) {
+        delete event.target.properties.pageInfo.parameters
+      }
+
+      if (event.target.properties?.pageInfo?.interests) {
+        delete event.target.properties.pageInfo.interests
+      }
+    }
+
+    return event
   }
 
   mapEvent(event: any): any {

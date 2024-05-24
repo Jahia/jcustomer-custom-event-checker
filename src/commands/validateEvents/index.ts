@@ -235,6 +235,10 @@ export default class ValidateEvents extends Command {
       if (event.source.properties?.pageInfo?.interests) {
         delete event.source.properties.pageInfo.interests
       }
+
+      if (event.source.properties?.attributes) {
+        delete event.source.properties?.attributes
+      }
     }
 
     if (event.target && event.target.itemType === 'page') {
@@ -244,6 +248,10 @@ export default class ValidateEvents extends Command {
 
       if (event.target.properties?.pageInfo?.interests) {
         delete event.target.properties.pageInfo.interests
+      }
+
+      if (event.target.properties?.attributes) {
+        delete event.target.properties?.attributes
       }
     }
 

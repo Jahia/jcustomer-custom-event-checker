@@ -95,8 +95,9 @@ export default class ValidateEvents extends Command {
     if (invalidScopes.length > 0) {
       this.log('Scopes with invalid characters were detected (using regexp: "a-zA-Z0-9_.-"):')
       for (const scope of invalidScopes) {
-         this.log(`  - ${scope}`)
+        this.log(`  - ${scope}`)
       }
+
       this.log('You need to remove these scopes from Elasticsearch before continuing.')
       const esDeleteQuery = `
         POST YOUR_EVENT_INDICES-event-*/_delete_by_query
@@ -109,7 +110,7 @@ export default class ValidateEvents extends Command {
           }
         }`
       this.log('To remove invalid scopes from Elasticsearch, execute:\n')
-      this.log(esDeleteQuery)      
+      this.log(esDeleteQuery)
       this.error('Please remove these scopes and run the event checker again.', {exit: 1})
     } else {
       this.log('Verified that no scopes containes invalid characters')

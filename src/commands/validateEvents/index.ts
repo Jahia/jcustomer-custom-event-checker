@@ -90,10 +90,13 @@ export default class ValidateEvents extends Command {
 
     // Search for source scopes that might contain invalid characters
     // These need to be removed before beginning the migration
-    const invalidScopes = sourceScopes.filter((scope: string) => /[^a-zA-Z0-9_.-]/.test(scope))
+    // Note the regex /[^\w.-]/ in JS/TS is equivalent to .*[^A-Za-z0-9_.-].* in ES
+    const invalidScopes = sourceScopes.filter((scope: string) => /[^\w.-]/.test(scope))
     if (invalidScopes.length > 0) {
       this.log('Scopes with invalid characters were detected (using regexp: "a-zA-Z0-9_.-"):')
-      invalidScopes.forEach(scope => this.log(`  - ${scope}`))
+      for (const scope of invalidScopes) {
+         this.log(`  - ${scope}`)
+      }
       this.log('You need to remove these scopes from Elasticsearch before continuing.')
       const esDeleteQuery = `
         POST YOUR_EVENT_INDICES-event-*/_delete_by_query
@@ -104,9 +107,9 @@ export default class ValidateEvents extends Command {
               "scope.keyword": ".*[^A-Za-z0-9_.-].*"
             }
           }
-        }`;
-      this.log('To remove invalid scopes from Elasticsearch, execute:\n');
-      this.log(esDeleteQuery);        
+        }`
+      this.log('To remove invalid scopes from Elasticsearch, execute:\n')
+      this.log(esDeleteQuery)      
       this.error('Please remove these scopes and run the event checker again.', {exit: 1})
     } else {
       this.log('Verified that no scopes containes invalid characters')

@@ -22,7 +22,7 @@ jobs:
     needs: [lint]
     name: Build
     runs-on: ubuntu-latest
-    # if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    # if: github.event_name == 'push' && github.ref == 'refs/heads/main'
 
     container:
       image: node:lts-alpine
